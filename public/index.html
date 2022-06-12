@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<head>
+    <title>I-Shop shopping portal</title>
+    <script src="../node_modules/jquery/dist/jquery.js"></script>
+    <script src="../node_modules/jquery.cookie/jquery.cookie.js"></script>
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="../node_modules/bootstrap-icons/font/bootstrap-icons.css">
+    <script>
+        $(document).ready(function(){
+            var cookieValue = $.cookie("user");
+            var cart = $.cookie("cart");
+            
+            if(cookieValue==null || cookieValue=='' || cookieValue== undefined ){
+                location.href="login.html";
+            }
+            var cartItem = [];
+            $('#username').html(`&nbsp;&nbsp;${cookieValue}`);
+           
+           
+           /**** remove items form cart ****/
+            $('#cartItems').on('click', 'button', function(e){
+            
+            var itemId = $(this).val();
+            console.log(`id = ${itemId}`);
+            cartItem = cartItem.filter(data => data.id != itemId);
+            
+            updateCount(cartItem.length);
+            var cartItemRows = cartItemStr();
+            $("#cartItems").html(cartItemRows);
+            $.cookie("cart",cart);
+
+            })   
+           
+           updateCount(0);
+           let allItems =[];
+
+             /**** remove cookies on from browser ****/
+           
+           function removeCookiesFunction(){
+                $.removeCookie('user');
+                $.removeCookie('password');
+                $.removeCookie('cart');
+            }
+           
+            
+          
+             /**** sign out functionality ****/
+            $("#signOutButton").click(function(){
+              removeCookiesFunction();
+              
+                location.href="login.html";
+              })
+           
+           
+
+        
+                let url='https://fakestoreapi.com/products';
+               /**** loading all products on home page after successful sign in  ****/
+                $.ajax({
+                    method:'get',
+                    url:`${url}`,
+                    success:function (data, status, xhr) {
+                        console.log('products fetched '+data.length);
+                        var cardCode ='';
+                        allItems = data;
+                        var total = 0;
+                        $.each(data , function(key, val){
+                                console.log(`name ${val.title}`);
+                                cardCode =cardCode+ `<div class="col-3 mt-3 "><div class="card m-1" style="width:95%;" >
+                                                      <div style="text-align:center">
+                                                      <img src="${val.image}" class="card-img-top" alt="..."  style="height:150px;width:150px" >
+                                                      </div>
+                                                      <div class="card-body overflow-auto" style="height:200px;text-align:center">
+                                                          <h6 class="card-title">${val.title}</h6>
+                                                          <p class="card-text" style=" font-size: 12px;">${val.description}</p>                                                        
+                                                      </div>
+                                                      <div class="card-footer text-center">
+                                                        <p class="card-text font-weight-bold">&#36;${val.price}</p>
+                                                         
+                                                          <button class="btn btn-warning" id="btnAddToCart" value=${val.id}> Add To Cart</button>
+                                                      </div>
+                                                 </div></div>`
+                        })
+                        $('#cardContainer').html(cardCode);
+
+                    }
+                })
+
+                function updateCount(length){
+                  $('#cartItemCount').html(length);                  
+                }
+                            
+                $("#cartButton").click(function(){
+                  var cartItemRows = cartItemStr();
+                  $("#cartItems").html(cartItemRows[0]);
+                  $("#totalPrice").html(`Total Amount : &#36;${cartItemRows[1]}`);
+                  
+                })
+                  /**** getting item and adding to cart array  ****/
+                $('#cardContainer').on('click', 'button', function(e){
+
+                  
+                            var item = allItems.find(element => element.id==$(this).val());
+                            
+                            cartItem.push(item);
+                            updateCount(cartItem.length);
+                  });
+                  /**** addind table rows for cart items  ****/
+                  function cartItemStr(){
+                        var cartItemRows = '';
+                        var totalPrice = 0;
+
+                        $.each(cartItem, function(key,value){
+
+                          totalPrice = totalPrice+parseFloat(value.price);
+
+                        cartItemRows = cartItemRows+`<tr>
+                                      <td class="p-3"><img src="${value.image}" width="50px" height="50px"/></td>
+                                      <td>${value.title}</td>
+                                      <td>&#36;${value.price}</td>
+                                      <td class="text-center">
+                                        <button type="button"  class="btn btn-link " style="text-decoration:none" value="${value.id}"><i class="bi bi-trash"></i></button>
+                                      </td>
+                                        </tr>`
+
+
+                        })
+                        return [cartItemRows,totalPrice];
+                  }
+
+           
+               
+            
+        })
+    </script>
+</head>
+<body onbeforeunload="removeCookiesFunction()">
+    <div class="w-100 m-0 bg-primary text-white row align-item align-items-center " style="height: 100px">
+        <div class="col-3 "><h2>I-Shop</h2></div>      
+        <div class="col-3"></div> 
+        <div class="col-6 text-end">          
+          <button type="button" id="signOutButton" class="btn btn-link text-white">Sign Out</button>
+          <button type="button" id="user" class="btn  text-white"><span class="bi bi-person-square text-decoration-none" id="username"></span></button>
+          <button class="btn btn-link text-white" id="cartButton" type="button"  data-bs-toggle="modal" data-bs-target="#cartModal" style="text-decoration: none;"><i class="bi bi-cart"></i>[<span id="cartItemCount"></span>]</button>
+        </div> 
+   </div>
+    <div class="row" id="cardContainer">
+        
+          
+    </div>
+    <div class="modal fade " id="cartModal">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="width:100%">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Cart Item</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" >
+            <table style="width: 100%;font-size: small;">
+              <thead class="text-center">
+                <th>Item</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Remove</th>
+              </thead>
+              <tbody id="cartItems" class="text-center">
+                
+              </tbody>             
+
+            </table>
+
+          </div>
+          <div class="modal-footer">
+            <span id="totalPrice"> </span>
+            
+          </div>
+
+
+        </div>
+      </div> 
+
+    </div>
+</body>
+</html>

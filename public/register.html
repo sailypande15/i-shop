@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<head>
+    <title>Register</title>
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.css">
+    <script src="../node_modules/jquery/dist/jquery.js"></script>
+    <script src="../node_modules/jquery.cookie/jquery.cookie.js"></script>
+   
+    <script>
+        $(document).ready(function(){
+                var passwordRegx  = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+               //regular expression for password
+               var mailRegx  =  /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;;
+                    $("button").click(function(){
+
+                        console.log("inside button click....");
+                        var username = $("#userId").val();
+                        var password = $("#password").val();
+                        var emailId = $("#emailId").val();
+                        var gender = $('input[name="gender"]:checked').val();
+
+                        console.log(`${username}-${password}-${emailId}-${gender}`);
+                        if(validateElement("#userId",/^(?=.*[a-z])[a-z0-9]{8,20}$/i)
+                            && validateElement("#password",passwordRegx)
+                            &&validateElement("#emailId",mailRegx)&& gender!=undefined){
+
+                               //request with URL,data,success callback
+                                $.post("http://127.0.01:8080/registeruser",
+                                {"username":`${username}`,"password":`${password}`,"email":`${emailId}`,"gender":`${gender}`},
+                                    function(data, textStatus, jqXHR)
+                                    {
+                                        console.log(data);
+                                        $.cookie("user",`${username}`);
+                                        $.cookie("password",`${password}`);
+                                        location.href = "index.html";
+                                
+                                    });
+
+                        }else{
+                            $("#error").html('Invalid user details ');
+                        }
+                       
+                        })
+
+                        function validateElement(elementId,regx){
+                           var elementVal =  $(elementId).val();
+                           return regx.test(elementVal);
+
+                        }
+                        $("#userId , #password , #emailId").focus(function(){
+                            $("#error").html('');
+                        })
+
+                        $("#userId").focusout(function(){
+                            if( validateElement("#userId",/^(?=.*[a-z])[a-z0-9]{8,20}$/i)){
+                                $(this).css('border-color', '');
+                                $(this).next().html("");
+                                
+                            }else{
+                                
+                                $(this).next().html("Invalid User Id");
+                                $(this).css('border-color', 'red');
+                            }
+
+                        })
+                        $("#password").focusout(function(){
+                            //regular expression for password
+                            //Minimum eight characters, at least one letter, one number and one special character:
+                            var passwordRegx  = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+                            if( validateElement("#password",passwordRegx)){
+                                $(this).css('border-color', '');
+                                $(this).next().html("");
+                                
+                            }else{
+                                
+                                $(this).next().html("Invalid Password");
+                                $(this).css('border-color', 'red');
+                            }
+
+                        })
+                        $("#emailId").focusout(function(){
+                            
+                            if( validateElement("#emailId",mailRegx)){
+                                $(this).css('border-color', '');
+                                $(this).next().html("");
+                                
+                            }else{
+                                
+                                $(this).next().html("Invalid EmailId");
+                                $(this).css('border-color', 'red');
+                            }
+
+                        })
+           
+        })
+       
+             
+
+    </script>
+</head>
+<body>
+    <div class="w-100 m-0 bg-primary text-white row align-item align-items-center " style="height: 100px">
+        <div class="col-3 "><h2>I Shop</h2></div>      
+        <div class="col-6"></div> 
+        <div class="col-3"></div> 
+   </div>
+        <div class="d-flex justify-content-center" >
+            <div class="w-50 ">
+               
+                <div class="row border border-primary">
+                    <div class="bg-primary col-5 text-white p-2">
+                        <h4>Looks like you're new here!</h4>
+                        <p>Sign up with your mobile number to get started</p>
+                        <div style="margin-top: 70px;"><img src="../images/regitration.png" width="100%" height="150px"></div>
+                    </div>
+                    <div class="col-7 p-5">
+                            <div style="height: 20px;" class="mb-3">
+                                <p id="error" style="color:red"></p>
+                            </div>
+                            <div class="row mb-1">
+                                <input type="text" placeholder="Enter user name" id="userId" class="form-control" required="required" pattern="^(?=.*[a-z])[a-z0-9]{8,20}$/i"/>
+                                <p style="color:red"></p>
+                            </div>
+                            <div class="row mb-1">
+                                <input type="password" placeholder="Enter password" id="password" class="form-control" required="required" pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"/>
+                                <p style="color:red"></p>
+                            </div>
+                            <div class="row mb-1">
+                                <input type="email" placeholder="Enter email" class="form-control" id="emailId" required="required"/>
+                                <p style="color:red"></p>
+                            </div>
+                            <div class="mb-1">  
+                                <label for="html"></label>                  
+                                <input type="radio" id="male" name="gender" value="male" class="form-radio">
+                                Male</label>
+                                <label for="html"></label>                  
+                                <input type="radio" id="female" name="gender" value="female" class="form-radio">
+                                Female</label>
+                            </div>
+                            <div class="row justify-content-center mt-3">
+                                <button class="btn btn-warning">Register</button>
+                            </div>
+                </div>
+                </div>
+            </div>
+
+
+        </div>
+</body>
+</html>

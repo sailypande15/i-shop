@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<head>
+    <title>Login</title>
+    <script src="../node_modules/jquery/dist/jquery.js"></script>
+    <script src="../node_modules/jquery.cookie/jquery.cookie.js"></script>
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.css">
+    <style>
+        input:required:focus:invalid{
+            border: 1px solid red;
+        }
+        input:required:focus:valid {
+            border:none;
+        }
+    </style>
+    <script>
+         $(document).ready(function(){          
+           
+            $("button").click(function(){
+              var userId =   $("#userId").val();
+              var password = $("#password").val();
+             if( validateUserId() && validatePassword()){
+              
+                            $.ajax({
+                                method:"get",
+                                url:"http://127.0.0.1:8080/getusers",
+                                success:function(result){
+                                    $.each(result,function(key,value){
+                                        if(userId = value.username && password == value.password){
+                                            console.log("adding user to cookies...");
+                                            $.cookie("user",`${userId}`);
+                                            $.cookie("password",`${password}`);
+                                            location.href = "index.html";
+                                        }
+                                        else{
+                                        $("#error").html("Invalid user id password.");  
+                                        }
+                                    })
+                                }
+                            })
+                }
+            });
+            $("#userId").focusout(function(){
+                validateUserId();
+            })
+            function validateUserId(){
+                //regular expression for user id
+                //user id should be 8-20 char, atleast one letter
+                 var userIdRegx  = /^(?=.*[a-z])[a-z0-9]{8,20}$/i;
+                 var userId =   $("#userId").val();
+                 if(userIdRegx.test(userId)){
+                    console.log("valid user id"); 
+                    $("#userId").next().html(""); 
+                    $("#userId").css("border:none");                 
+                    return true; 
+                 }else{
+                    console.log("invalid user id");
+                    $("#userId").css("border:1px solid red");
+                    $("#userId").next().html("User id is not valid");
+                    return false;
+                 }
+            }
+            $("#password").focusout(function(){
+                validatePassword();
+            })
+            function validatePassword(){
+                //regular expression for password
+                //Minimum eight characters, at least one letter, one number and one special character:
+                 var passwordRegx  = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+                 var password =   $("#password").val();
+                 if(passwordRegx.test(password)){
+                    console.log("valid password"); 
+                    $("#password").next().html(""); 
+                    $("#password").css("border:none");                 
+                    return true; 
+                 }else{
+                    console.log("invalid password");
+                    $("#password").css("border:1px solid red");
+                    $("#password").next().html("Password is not valid");
+                    return false;
+                 }
+            }
+        })
+    </script>
+</head>
+<body>
+    <div class="w-100 m-0 bg-primary text-white row align-item align-items-center " style="height: 100px">
+         <div class="col-3 "><h2>I Shop</h2></div>      
+         <div class="col-6"></div> 
+         <div class="col-3"></div> 
+    </div>
+    <div  class="d-flex justify-content-center w-100 align-items-center" style="height: 500px;">
+        
+        <div class="w-50">  
+            <div class="row border border-primary">
+                <div class="col-5  bg-primary p-2 text-white">
+                    <h4>Login here</h4>
+                    <p>Access your Order History!!</p>
+                    <div style="margin-top: 80px;"><img src="../images/e-commerse.jpg" width="100%" height="150px"></div>
+                </div>
+                <div class="col-7 ps-5 pe-5 pt-5">
+                    <div style="padding-top: 10px;" class="mb-3">
+                        <p id="error" style="color:red"></p>
+                    </div>
+                        <div class="mb-3">
+                            <label for="exampleFormControlInput1" class="form-label">User Id</label>
+                            <input type="text" class="form-control" id="userId" placeholder="Enter User Id" required="required">
+                            <p style="color: red;"></p>
+                        </div>
+                        <div class="mb-3">
+                            <label for="exampleFormControlInput1" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" placeholder="Enter Password" required="required">
+                            <p style="color: red;"></p>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-warning  btn-block w-100">Log In</button>
+                        </div>
+                        <div  class="text-center pt-1" style="font-size: 12px;">
+                            <p><a href="./register.html" style="text-decoration:none" >New to I-Shop? Create an account</a></p>
+                        </div>
+                </div>
+            </div>
+           
+
+        </div>
+
+    </div>
+</body>
+</html>
