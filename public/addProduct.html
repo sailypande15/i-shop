@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="../node_modules/jquery/dist/jquery.js"></script>
+        <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.css">
+        <script src="../node_modules/bootstrap/dist/js/bootstrap.js"></script>
+        <link rel="stylesheet" href="../node_modules/@fortawesome/fontawesome-free/css/fontawesome.min.css">
+        <style>
+            input:required:focus:valid{
+                border:none;
+
+            }           
+            input:required:focus:invalid{
+               border: 1px red solid;
+                
+            }
+            textarea:required:focus:valid{
+                border:none;
+
+            }           
+            textarea:required:focus:invalid{
+               border: 1px red solid;
+                
+            }
+        </style>
+        <script>
+             $(document).ready(function(){   
+               
+                $.ajax({
+                    url:"https://fakestoreapi.com/products/categories",
+                    type:"GET",
+                    success:function(data){
+                        console.log("data -->"+data)
+                        let options = '';
+                        $.each(data,(key,value)=>{
+                           options= options+`<option>${value}</options>`
+                        })
+                        console.log(options)
+                        $("#category").html(options);
+                    }
+                })
+                $("#rating-selected").html($("#rating").val());
+
+                $("#submit").click(function(){
+                        console.log(`title = ${$("#title").val()} decription =  ${$("#description").val()} category =  ${$("#category").val()} image = ${$("#uploadImg").val()} ratings = ${$("#rating").val()} count = ${$("#count").val()} price = ${$("#price").val()}`);
+                        if(validateDescription()&&validateImage()&&validatePrice()&&validateTitle()){
+                            console.log("-----> all fileds are valid");
+                            var product={
+                                title:$("#title").val(),
+                                price:$("#price").val(),
+                                description:$("#description").val(),
+                                category:$("#category").val(),
+                                image:$("#uploadImg").val(),
+                                rating:{
+                                    rate:$("#rating").val(),
+                                    count:$("#count").val()
+                                }                        
+                            }
+
+                            $.ajax({
+                                url:'http://127.0.01:8082/product/create',
+                                type:'POST',
+                                contentType:"application/json",
+                                data: JSON.stringify(product),
+                                success:function(data){
+                                    location.href="indexAdmin.html";
+                                },
+                                error:function(){
+                                    console.log("!!!!!!!!!!!!!!!!!!Error!!!!!!!!!!!!!!!!!")
+                                }
+                            })
+                       
+                        }
+                })
+
+                function validateImage(){
+                    //validate image file extension
+                    var validation = true;   
+                    var re = /(\.jpg|\.jpeg|\.bmp|\.gif|\.png)$/i;
+                    if(re.exec($("#uploadImg").val())){
+                        $("#uploadImg").css("border:none");
+                        $("#uploadImg").next().html("");
+                    }else{
+                        $("#uploadImg").css("border:1px solid red");
+                        $("#uploadImg").next().html("Image is not valid");                       
+                        $("#uploadImg").next().css("color:red");
+                        validation = false;
+                    }
+                    return validation;
+                    
+                }
+                function validatePrice(){
+                    //validate image file extension
+                    var validation = true;   
+                    var price = parseInt($("#price").val());
+                    if(price>0){
+                        $("#price").css("border:none");
+                        $("#price").next().html("");
+                    }else{
+                        $("#price").css("border:1px solid red");
+                        $("#price").next().html("Image is not valid");                       
+                        $("#price").next().css("color:red");
+                        validation = false;
+                    }
+                    return validation;
+                    
+                }
+                function validateDescription(){
+                    //validate description
+                    var validation = true;    
+                    if($("#description").val()==null||$("#description").val()==undefined||$("#description").val().trim()==""){
+                        $("#description").css("border:1px solid red");
+                        $("#description").next().html("Image is not valid");                       
+                        $("#description").next().css("color:red");    
+                        validation = false;                    
+                    }else{
+                        $("#description").css("border:none");
+                        $("#description").next().html("");
+                        
+                    }
+                    return validation;
+                    
+                }
+                function validateTitle(){
+                    //validate title  
+                    var validation = true;                  
+                    if($("#title").val()==null||$("#title").val()==undefined||$("#title").val().trim()==""){
+                        $("#title").css("border:1px solid red");
+                        $("#title").next().html("Image is not valid");                       
+                        $("#title").next().css("color:red");    
+                        validation = false;                   
+                    }else{
+                        $("#title").css("border:none");
+                        $("#title").next().html("");
+                        
+                    }
+                    return validation;
+                    
+                }
+                
+                $("#rating").change(function(){
+                    console.log("----------------> rating"+$("#rating").val());
+                    $("#rating-selected").html($("#rating").val());
+
+                });
+                $("#uploadImg").change(function(){
+                    validateImage();
+                });
+                $("#description").on('change',function(){
+ 
+                  console.log(`description  ${$("#description").val()}`)
+                  validateDescription();
+                }); 
+                $("#title").change(function(){
+                    validateTitle();
+                })
+
+
+             })
+            
+        </script>
+
+    </head>
+    <body>
+        <div class="container-fluid d-flex justify-content-center">
+            
+           <div class="w-50 p-5 mt-5 border border-primary">
+                <h1 class="text-primary"> Create Product</h1>
+           
+                    <div class="form-group mb-3">
+                        <label for="title" class="form-label text-primary">Title</label>
+                        <input type="text" class="form-control  mt-2" id="title" required placeholder="Enter title of product">
+                        <small id="titleError" class="form-text" style="color:red"></small>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="description" class="form-label text-primary">Description</label>
+                      <textarea required class="form-control mt-2" id="description" placeholder="Enter the product description" row="3"></textarea>
+                        <small id="descriptionError" class="form-text"></small>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="category" class="form-label text-primary">Category</label>
+                        <select class="form-control mt-2" id="category">
+                           
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="uploadImg" class="form-label text-primary">Image</label>
+                        <input type="text" id="uploadImg" name="productImage" class="form-control mt-3" requird>
+                        <small id="imageError" style="color: red;"></small>
+                    </div>
+                    <div class="form-group mb-3">
+                        <div>
+                            <label for="ratings" class="form-label text-primary">Rating</label>
+                            <div>
+                               <input type="range" id="rating" name="rating" min="0" max="5"  step="0.5" class="form-range" required>
+                                <label  class="w-50" id="rating-selected"></label> 
+                            </div>
+                            <small id="ratingsError" class="form-text"></small>
+                        </div>
+                        <div>
+                            <label class="form-label text-primary">Count</label> 
+                            <input type="number" id="count" class="form-control" required/>
+                            <small id="countError" class="form-text"></small>
+                        </div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="price" class="form-label text-primary">Price</label>
+                        <input type="number" id="price" class="form-control" required/>
+                        <small id="countError" class="form-text"></small>  
+                    </div>
+                    <div class="form-group mb-3">
+                            <button class="btn btn-info" id="submit">Create Product</button>
+
+                        </div>
+            </div>
+        </div>
+
+
+    </body>
+</html>
