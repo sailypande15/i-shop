@@ -11,78 +11,67 @@
            
                 let url='http://127.0.01:8082/product/get-products';
                /**** loading all products on home page after successful sign in  ****/
-                $.ajax({
-                    method:'get',
-                    url:`${url}`,
-                    success:function (data, status, xhr) {
-                        console.log('products fetched '+data.length);
-                        var cardCode ='';
-                        allItems = data;
-                        var total = 0;
-                        $.each(data , function(key, val){
-                                console.log(`name ${val.title}`);
-                                cardCode =cardCode+ `<div class="col-3 mt-3 "><div class="card m-1" style="width:95%;" >
-                                                      <div style="text-align:center">
-                                                      <img src="${val.image}" class="card-img-top" alt="..."  style="height:150px;width:150px" >
-                                                      </div>
-                                                      <div class="card-body overflow-auto" style="height:200px;text-align:center">
-                                                          <h6 class="card-title">${val.title}</h6>
-                                                          <p class="card-text" style=" font-size: 12px;">${val.description}</p>                                                        
-                                                      </div>
-                                                      <div class="card-footer text-center">
-                                                        <p class="card-text font-weight-bold">&#36;${val.price}</p>
-                                                         
-                                                          <button class="btn btn-danger me-3" id="btnAddToCart" value=${val.id}> Delete </button>
-                                                          <button class="btn btn-warning" id="btnAddToCart" value=${val.id}> Update </button>
-                                                      </div>
-                                                 </div></div>`
-                        })
-                        $('#cardContainer').html(cardCode);
+               function loadPage(){
 
-                    }
-                })
+                        $.ajax({
+                            method:'get',
+                            url:`${url}`,
+                            success:function (data, status, xhr) {
+                                console.log('products fetched '+data.length);
+                                var cardCode ='';                       
+                                var total = 0;
+                                $.each(data , function(key, val){
+                                        console.log(`name ${val.title}`);
+                                        cardCode =cardCode+ `<div class="col-3 mt-3 "><div class="card m-1" style="width:95%;" >
+                                                              <div style="text-align:center">
+                                                              <img src="${val.image}" class="card-img-top" alt="..."  style="height:150px;width:150px" >
+                                                              </div>
+                                                              <div class="card-body overflow-auto" style="height:200px;text-align:center">
+                                                                  <h6 class="card-title">${val.title}</h6>
+                                                                  <p class="card-text" style=" font-size: 12px;">${val.description}</p>                                                        
+                                                              </div>
+                                                              <div class="card-footer text-center">
+                                                                <p class="card-text font-weight-bold">&#36;${val.price}</p>
+                                                                
+                                                                  <button class="btn btn-danger me-3" id="btnDelete" value=${val.id}> Delete </button>
+                                                                  <button class="btn btn-warning" id="btnAddToCart" value=${val.id}> Update </button>
+                                                              </div>
+                                                        </div></div>`
+                                })
+                                $('#cardContainer').html(cardCode);
 
-                function updateCount(length){
-                  $('#cartItemCount').html(length);                  
-                }
-                            
-                $("#cartButton").click(function(){
-                  var cartItemRows = cartItemStr();
-                  $("#cartItems").html(cartItemRows[0]);
-                  $("#totalPrice").html(`Total Amount : &#36;${cartItemRows[1]}`);
-                  
-                })
-                  /**** getting item and adding to cart array  ****/
-                $('#cardContainer').on('click', 'button', function(e){
+                            }
+                        });
 
-                  
-                            var item = allItems.find(element => element.id==$(this).val());
-                            
-                            cartItem.push(item);
-                            updateCount(cartItem.length);
+               }
+               
+
+                $(document).on('click','#btnDelete',function(e){
+                    alert('delete btn clicked');
+                    alert($(this).prop("value"));
+                    let productId = $(this).prop("value");
+                    let urlDeleteProduct='http://127.0.01:8082/product/delete/'+productId;
+                    alert(urlDeleteProduct);
+                    $.ajax({
+                        url:urlDeleteProduct,
+                        type:'DELETE',
+                        success:function(data){
+                          console.log('-------------------------------->product deleted..'+data); 
+                          loadPage();                         
+                          
+                         
+                        },
+                        error:function(e){
+                          console.log("error--------------------------->"+e.message);
+                          loadPage();  
+                         
+                        }
+
+                    })
                   });
-                  /**** addind table rows for cart items  ****/
-                  function cartItemStr(){
-                        var cartItemRows = '';
-                        var totalPrice = 0;
+               
 
-                        $.each(cartItem, function(key,value){
-
-                          totalPrice = totalPrice+parseFloat(value.price);
-
-                        cartItemRows = cartItemRows+`<tr>
-                                      <td class="p-3"><img src="${value.image}" width="50px" height="50px"/></td>
-                                      <td>${value.title}</td>
-                                      <td>&#36;${value.price}</td>
-                                      <td class="text-center">
-                                        <button type="button"  class="btn btn-link " style="text-decoration:none" value="${value.id}"><i class="bi bi-trash"></i></button>
-                                      </td>
-                                        </tr>`
-
-
-                        })
-                        return [cartItemRows,totalPrice];
-                  }
+                  loadPage();
 
            
                
@@ -95,44 +84,13 @@
         <div class="col-3 "><h2>I-Shop</h2></div>      
         <div class="col-3"></div> 
         <div class="col-6 text-end">          
-          
+           <a class="btn btn-link"  style="color: white;text-decoration: none;" href="addProduct.html">Create Product</a>
         </div> 
    </div>
     <div class="row" id="cardContainer">
+
         
           
-    </div>
-    <div class="modal fade " id="cartModal">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="width:100%">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Cart Item</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body" >
-            <table style="width: 100%;font-size: small;">
-              <thead class="text-center">
-                <th>Item</th>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Remove</th>
-              </thead>
-              <tbody id="cartItems" class="text-center">
-                
-              </tbody>             
-
-            </table>
-
-          </div>
-          <div class="modal-footer">
-            <span id="totalPrice"> </span>
-            
-          </div>
-
-
-        </div>
-      </div> 
-
     </div>
 </body>
 </html>
